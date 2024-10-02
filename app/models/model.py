@@ -10,3 +10,12 @@ class GenerationRequest(BaseModel):
         default="Hi, what is the color of the sky? Provide one word answer only.",
     )
     stream: bool = False
+
+
+class ChatRequest(BaseModel):
+    model: str = Field(description="Name of the model to use.", default="phi3:latest")
+    messages: list[dict[str, str]] = Field(
+        description="List of messages to be passed to the model.",
+        default=[{"role": "user", "content": "What is the color of the sky?"}],
+    )
+    stream: bool = False

@@ -3,7 +3,7 @@ from starlette import status
 from app.services.ollama import ollama_service
 from app.models.model import GenerationRequest, ChatRequest
 
-router = APIRouter()  # TODO: add prefix
+router = APIRouter(prefix="/api", tags=["Generation"])
 
 
 @router.post("/generate", status_code=status.HTTP_201_CREATED)

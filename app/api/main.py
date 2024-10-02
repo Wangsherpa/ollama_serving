@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from app.api.routers import router
+from app.api.routers import generation
 
 app = FastAPI()
-app.include_router(router)
+app.include_router(generation.router)
 
 
 @app.get("/")

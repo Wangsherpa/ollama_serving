@@ -2,19 +2,19 @@ import httpx
 from typing import List, Dict, Any
 
 from app.core.config import settings
+from app.models.model import GenerationRequest
 
 
 class OllamaService:
     def __init__(self, base_url: str = settings.OLLAMA_URL):
         self.base_url = base_url
 
-    # TODO: Make this function asynchronous
-    def generate_text(self, model: str, prompt: str) -> Dict[str, Any]:
+    async def generate_text(self, request: GenerationRequest) -> Dict[str, Any]:
         try:
-            with httpx.Client() as client:
-                response = client.post(
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
                     f"{self.base_url}/api/generate",
-                    json={"model": model, "prompt": prompt, "stream": False},
+                    json=request.model_dump(),
                     timeout=600.0,
                 )
                 response.raise_for_status()

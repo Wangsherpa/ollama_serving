@@ -21,6 +21,50 @@ class OllamaService:
         except Exception as exc:
             raise Exception(f"Failed to connect to ollama service.")
 
+    async def get_current_running_models(self) -> Dict[str, Any]:
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(f"{self.base_url}/api/ps")
+                response.raise_for_status()
+                result = response.json()
+                return result
+        except httpx.HTTPStatusError as exc:
+            raise Exception(f"OllamaService returned status code: {exc.status_code}.")
+        except Exception as exc:
+            raise Exception(f"Failed to connect to ollama service.")
+
+    async def pull_model(self, name: str) -> Dict[str, Any]:
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{self.base_url}/api/pull",
+                    json={"name": name, "stream": False},
+                    timeout=600.0,
+                )
+                response.raise_for_status()
+                result = response.json()
+                return result
+        except httpx.HTTPStatusError as exc:
+            raise Exception(f"OllamaService returned status code: {exc.status_code}.")
+        except Exception as exc:
+            raise Exception(f"Failed to connect to ollama service.")
+
+    async def delete_model(self, name: str) -> Dict[str, Any]:
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.request(
+                    method="DELETE",
+                    url=f"{self.base_url}/api/delete",
+                    json={"name": name},
+                    timeout=300.0,
+                )
+                response.raise_for_status()
+                return {"status": "success"}
+        except httpx.HTTPStatusError as exc:
+            raise Exception(f"OllamaService returned status code: {exc.status_code}.")
+        except Exception as exc:
+            raise Exception(f"Failed to connect to ollama service.")
+
     async def generate_text(self, request: GenerationRequest) -> Dict[str, Any]:
         try:
             async with httpx.AsyncClient() as client:

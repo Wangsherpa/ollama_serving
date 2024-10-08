@@ -1,5 +1,5 @@
 import httpx
-from typing import Dict, Any
+from typing import Dict, Any, Union
 
 from app.core.config import settings
 from app.core.exceptions import OllamaServiceException
@@ -73,6 +73,30 @@ class OllamaService:
             )
         except Exception as exc:
             raise OllamaServiceException(f"Failed to connect to ollama service.")
+
+    async def stream_response(
+        self, request: Union[GenerationRequest, ChatRequest], chat: bool = False
+    ):
+        url = f"{self.base_url}/api/generate"
+        if chat:
+            url = f"{self.base_url}/api/chat"
+        try:
+            async with httpx.AsyncClient() as client:
+                async with client.stream(
+                    method="POST",
+                    url=url,
+                    json=request.model_dump(exclude=["stream"]),
+                    timeout=600.0,
+                ) as response:
+                    response.raise_for_status()
+                    async for chunk in response.aiter_bytes():
+                        yield chunk
+        except httpx.HTTPStatusError as exc:
+            raise OllamaServiceException(
+                f"OllamaService returned status code {exc.response.status_code}."
+            )
+        except Exception as exc:
+            raise OllamaServiceException("Failed to connect to ollama service.")
 
     async def generate_text(self, request: GenerationRequest) -> Dict[str, Any]:
         try:

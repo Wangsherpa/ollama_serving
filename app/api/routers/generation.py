@@ -18,14 +18,18 @@ async def generate(request: GenerationRequest) -> dict:
         model_names = [model["name"] for model in available_models["models"]]
         if requested_model not in model_names:
             raise ModelNotFoundException(requested_model)
-        response = await ollama_service.generate_text(request=request)
-        return response
+
+        if request.stream:
+            return StreamingResponse(
+                ollama_service.stream_response(request), media_type="text/event-stream"
+            )
+        else:
+            response = await ollama_service.generate_text(request=request)
+            return response
     except ModelNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise OllamaBaseException("Failed to generate response", "GENERATION_ERROR")
-
-    return response
 
 
 @router.post("/chat", status_code=status.HTTP_201_CREATED)
@@ -38,10 +42,15 @@ async def chat(request: ChatRequest) -> dict:
         model_names = [model["name"] for model in available_models["models"]]
         if requested_model not in model_names:
             raise ModelNotFoundException(requested_model)
-        response = await ollama_service.chat(request)
+        if request.stream:
+            return StreamingResponse(
+                ollama_service.stream_response(request, chat=True),
+                media_type="text/event-stream",
+            )
+        else:
+            response = await ollama_service.chat(request)
+            return response
     except ModelNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise OllamaBaseException("Failed to generate response", "CHAT_ERROR")
-
-    return response

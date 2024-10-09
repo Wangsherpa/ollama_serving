@@ -12,6 +12,10 @@ class GenerationRequest(BaseModel):
         min_length=1,
         default="Hi, what is the color of the sky? Provide one word answer only.",
     )
+    options: dict = Field(
+        description="Set custom options for the model at runtime.",
+        default={"temperature": 0.8, "num_predict": 100},
+    )
     stream: Optional[bool] = False
 
 
@@ -33,5 +37,9 @@ class ChatRequest(BaseModel):
     messages: List[ChatMessage] = Field(
         description="List of messages to be passed to the model.",
         default=[{"role": "user", "content": "What is the color of the sky?"}],
+    )
+    options: dict = Field(
+        description="Set custom options for the model at runtime.",
+        default={"temperature": 0.8, "num_predict": 100},
     )
     stream: Optional[bool] = False

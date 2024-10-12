@@ -7,10 +7,13 @@ from app.models.model import GenerationRequest, ChatRequest
 
 
 class OllamaService:
+    """Ollama Service class, handles ollama's operations like pull, delete, generate and chat"""
+
     def __init__(self, base_url: str = settings.OLLAMA_URL):
         self.base_url = base_url
 
     async def get_models(self) -> Dict[str, Any]:
+        """Returns the information about all the available models"""
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(f"{self.base_url}/api/tags")
@@ -25,6 +28,7 @@ class OllamaService:
             raise OllamaServiceException(f"Failed to connect to ollama service.")
 
     async def get_current_running_models(self) -> Dict[str, Any]:
+        """Returns the information about all running models."""
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(f"{self.base_url}/api/ps")
@@ -39,6 +43,7 @@ class OllamaService:
             raise OllamaServiceException(f"Failed to connect to ollama service.")
 
     async def pull_model(self, name: str) -> Dict[str, Any]:
+        """Pulls the model from Ollama's models library"""
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
@@ -57,6 +62,7 @@ class OllamaService:
             raise OllamaServiceException(f"Failed to connect to ollama service.")
 
     async def delete_model(self, name: str) -> Dict[str, Any]:
+        """Deletes the model."""
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.request(
@@ -99,6 +105,7 @@ class OllamaService:
             raise OllamaServiceException("Failed to connect to ollama service.")
 
     async def generate_text(self, request: GenerationRequest) -> Dict[str, Any]:
+        """Function to generate response."""
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
@@ -117,6 +124,7 @@ class OllamaService:
             raise OllamaServiceException("Failed to connect to ollama service.")
 
     async def chat(self, request: ChatRequest) -> Dict[str, Any]:
+        """Function to generate response as a chat assistant."""
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(

@@ -2,6 +2,7 @@ from datetime import timedelta
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
+from starlette import status
 from sqlalchemy.orm import Session
 
 from app.db.base import get_db
@@ -14,7 +15,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 db_dependency = Annotated[Session, Depends(get_db)]
 
 
-@router.post("/")
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_req: UserRequest):
     create_user_model = Users(
         email=create_user_req.email,
@@ -28,7 +29,7 @@ async def create_user(db: db_dependency, create_user_req: UserRequest):
     db.commit()
 
 
-@router.post("/token", response_model=Token)
+@router.post("/token", response_model=Token, status_code=status.HTTP_201_CREATED)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency
 ):

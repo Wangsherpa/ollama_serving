@@ -1,16 +1,22 @@
-from fastapi import APIRouter, HTTPException
+from typing import Annotated
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from starlette import status
 from app.services.ollama import ollama_service
-from app.models.model import GenerationRequest, ChatRequest
+from app.models.llm import GenerationRequest, ChatRequest
 from app.core.exceptions import ModelNotFoundException, OllamaBaseException
+from app.core.auth import get_current_user
 
 router = APIRouter(prefix="/api", tags=["Generation"])
 
+user_dependency = Annotated[dict, Depends(get_current_user)]
+
 
 @router.post("/generate", status_code=status.HTTP_201_CREATED)
-async def generate(request: GenerationRequest) -> dict:
+async def generate(request: GenerationRequest, user: user_dependency) -> dict:
     try:
+        if user is None:
+            raise HTTPException(status_code=401, detail="Not Authenticated")
         requested_model = request.model
         if ":" not in requested_model:
             requested_model += ":latest"
@@ -33,8 +39,10 @@ async def generate(request: GenerationRequest) -> dict:
 
 
 @router.post("/chat", status_code=status.HTTP_201_CREATED)
-async def chat(request: ChatRequest) -> dict:
+async def chat(request: ChatRequest, user: user_dependency) -> dict:
     try:
+        if not user:
+            raise HTTPException(status_code=401, detail="Not Authenticated")
         requested_model = request.model
         if ":" not in requested_model:
             requested_model += ":latest"

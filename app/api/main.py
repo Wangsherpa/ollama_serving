@@ -3,11 +3,19 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from app.api.routers import generation
 from app.api.routers import model_management
+from app.api.routers import auth
 from app.core.exceptions import OllamaBaseException
+from app.db import models
+from app.db.base import engine
 
 app = FastAPI()
+
+# create a database + tables
+models.Base.metadata.create_all(bind=engine)
+
 app.include_router(generation.router)
 app.include_router(model_management.router)
+app.include_router(auth.router)
 
 
 # Exception handlers

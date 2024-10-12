@@ -3,7 +3,7 @@ from typing import Dict, Any, Union
 
 from app.core.config import settings
 from app.core.exceptions import OllamaServiceException
-from app.models.model import GenerationRequest, ChatRequest
+from app.models.llm import GenerationRequest, ChatRequest
 
 
 class OllamaService:
